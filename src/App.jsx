@@ -4,7 +4,7 @@ import './App.css';
 function App() {
   const [user, setUser] = useState(null); // Inicialize user como null
   const [number, setNumber] = useState(1);
-  const [inputValue, setInputValue] = useState(''); // Inicialize inputValue como uma string vazia
+  const [inputValue, setInputValue] = useState('vbrosso'); // Inicialize inputValue como uma string vazia
   const [userNotFound, setUserNotFound] = useState(false); // Estado para rastrear se o usuário não foi encontrado
 
   const changeNumber = () => {
@@ -38,6 +38,12 @@ function App() {
     setUserNotFound(false); // Limpa o estado de usuário não encontrado ao digitar no input
   }
 
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      handleSearch(); // Chame a função de busca quando a tecla "Enter" for pressionada
+    }
+  }
+
   return (
     <div className='App'>
       <div>
@@ -46,6 +52,7 @@ function App() {
           type='text'
           value={inputValue}
           onChange={handleInputChange}
+          onKeyPress={handleKeyPress}
         />
         <button onClick={handleSearch}>Buscar</button> {/* Botão de busca */}
         {user && (
@@ -54,15 +61,12 @@ function App() {
             <p><strong>Nome:</strong> {user.name} </p>
            
             <p><strong>Location:</strong> {user.location}</p>
-            <img src={user.avatar_url} alt={user.name} />
+            <img src={user.avatar_url} alt={user.name} className='imgPerfil' />
             <legend>Link da Api: <a href={user.url} target='_blank' title={user.name}>{user.name} </a></legend>
           </div>
         )}
         
       </div>
-
-      {/* Meu número é: {number}
-      <button onClick={changeNumber}>Mudar número!</button> */}
     </div>
   );
 }

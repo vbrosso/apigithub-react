@@ -5,6 +5,10 @@
   text-align: center;
 }
 
+.imgPerfil{
+  max-width: 320px;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
