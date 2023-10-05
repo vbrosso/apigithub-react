@@ -1,32 +1,29 @@
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 
 function App() {
-  const [user, setUser] = useState(null); // Inicialize user como null
-  const [number, setNumber] = useState(1);
-  const [inputValue, setInputValue] = useState('vbrosso'); // Inicialize inputValue como uma string vazia
-  const [userNotFound, setUserNotFound] = useState(false); // Estado para rastrear se o usuário não foi encontrado
-
-  const changeNumber = () => {
-    setNumber((prevNumber) => prevNumber + 1);
-  }
+  const [inputValue, setInputValue] = useState('');
+  const [userNotFound, setUserNotFound] = useState(false);
+  const [userList, setUserList] = useState([]); // Estado para armazenar a lista de resultados
 
   const handleSearch = () => {
     if (inputValue) {
-      fetch(`https://api.github.com/users/${inputValue}`)
+      fetch(`https://api.github.com/search/users?q=${inputValue}&type=Users`)
         .then((res) => {
           if (res.status === 404) {
-            setUserNotFound(true); // Define o estado para indicar que o usuário não foi encontrado
-            setUser(null);
+            setUserNotFound(true);
+            setUserList([]); // Limpa a lista de resultados
             return null;
           }
           return res.json();
         })
         .then((json) => {
-          if (json) {
-            setUser(json);
-            setInputValue(json.login);
-            setUserNotFound(false); // Define o estado de volta para falso se o usuário for encontrado
+          if (json.items && json.items.length > 0) {
+            setUserList(json.items); // Armazena a lista de resultados
+            setUserNotFound(false);
+          } else {
+            setUserNotFound(true);
+            setUserList([]); // Limpa a lista de resultados
           }
         })
         .catch((error) => console.error("Erro ao buscar dados do usuário:", error));
@@ -35,37 +32,42 @@ function App() {
 
   const handleInputChange = (e) => {
     setInputValue(e.target.value);
-    setUserNotFound(false); // Limpa o estado de usuário não encontrado ao digitar no input
+    setUserNotFound(false);
   }
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
-      handleSearch(); // Chame a função de busca quando a tecla "Enter" for pressionada
+      handleSearch();
     }
   }
 
   return (
     <div className='App'>
-      <div>
-        <h2>Digite o seu nome de usuário do github:</h2>
+      <div> 
+        <h2>Digite o seu nome de usuário do GitHub:</h2>
         <input
           type='text'
           value={inputValue}
+          placeholder='Digite um nome'
+          className='inputSearch'
           onChange={handleInputChange}
           onKeyPress={handleKeyPress}
         />
-        <button onClick={handleSearch}>Buscar</button> {/* Botão de busca */}
-        {user && (
-            <div>
-            <p>Seu nome de usuario é {user.login}</p>
-            <p><strong>Nome:</strong> {user.name} </p>
-           
-            <p><strong>Location:</strong> {user.location}</p>
-            <img src={user.avatar_url} alt={user.name} className='imgPerfil' />
-            <legend>Link da Api: <a href={user.url} target='_blank' title={user.name}>{user.name} </a></legend>
-          </div>
+        <button onClick={handleSearch} class="btnBuscar">Buscar</button>
+        {userList.length > 0 ? (
+          <ul className='listUsers'>
+            {userList.map((user) => (
+              <li key={user.id}>
+                <a href={user.html_url} target="_blank" class="lnkPerfil">
+                  <img src={user.avatar_url} alt={user.login} target="_blank" className='imgPerfil' />
+                </a>
+                <p><a href={user.html_url} target="_blank">{user.login}</a></p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>{userNotFound ? 'Nenhum usuário encontrado.' : ''}</p>
         )}
-        
       </div>
     </div>
   );
